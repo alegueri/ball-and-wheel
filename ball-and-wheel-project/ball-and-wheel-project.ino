@@ -6,8 +6,13 @@ static uint8_t currentA = 0;
 static uint8_t currentB = 0;
 
 static uint8_t prevDir = 2;
-static uint8_t direction = 2; // 0 -> Clockwise 1 -> CC
+static uint8_t direction = 2;  // 0 -> Clockwise 1 -> CC
 volatile long count = 0;
+volatile long currentCount = 0;
+static float diff = 0;
+static float revPerMin = 0;
+static long total = 0;
+
 // long lastPrintCount = 0;
 
 void setup() {
@@ -19,55 +24,63 @@ void setup() {
 }
 
 void loop() {
-  if (prevDir != direction){
+  if (prevDir != direction) {
     prevDir = direction;
-    if (direction == 0){
+    if (direction == 0) {
       Serial.println("Clockwise");
-    }else{
+    } else {
       Serial.println("Counter clockwise");
     }
   }
-
+  currentCount = count;
+  delay(10);
+  diff = count - currentCount;
+  if (diff!=0){
+    Serial.print("The difference is...:");
+    Serial.println(diff);
+    revPerMin = (diff/(64*6.25));
+    total = revPerMin * 100 * 60;
+    Serial.println(total);
+  }
 }
 
 void checkState() {
   currentA = digitalRead(encoderA);
   currentB = digitalRead(encoderB);
-  if (currentA == 0){
-    if (prevA == 0){
-      if (currentB == 1){
+  if (currentA == 0) {
+    if (prevA == 0) {
+      if (currentB == 1) {
         direction = 0;
-        
-      } else{
+
+      } else {
         direction = 1;
       }
     }
-    if (prevA == 1){
-      if (currentB == 0){
-        direction=0;
-      } else{
-        direction=1;
-      }
-    }
-  }
-  
-  if(currentA == 1) {
-    if (prevA == 1){
-      if (currentB == 0){
-        direction=0;
-      }else{
-        direction=1;
-      }
-    }
-    if (prevA == 0){
-      if (currentB == 1){
-        direction=0;
-      }else{
-        direction=1;
+    if (prevA == 1) {
+      if (currentB == 0) {
+        direction = 0;
+      } else {
+        direction = 1;
       }
     }
   }
 
+  if (currentA == 1) {
+    if (prevA == 1) {
+      if (currentB == 0) {
+        direction = 0;
+      } else {
+        direction = 1;
+      }
+    }
+    if (prevA == 0) {
+      if (currentB == 1) {
+        direction = 0;
+      } else {
+        direction = 1;
+      }
+    }
+  }
   prevA = currentA;
   count++;
 }
